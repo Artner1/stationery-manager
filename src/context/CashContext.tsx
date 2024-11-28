@@ -6,6 +6,7 @@ export type CashTransaction = {
   type: 'Entrada' | 'Saída';
   amount: number;
   date: string;
+  saldo: number; // Adiciona o saldo atual após a transação
 };
 
 type CashContextData = {
@@ -33,7 +34,8 @@ export const CashProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const registrarTransacao = async (type: 'Entrada' | 'Saída', amount: number) => {
     try {
       const date = new Date().toISOString();
-      await addCashTransaction(type, amount, date); // Adiciona a transação no banco de dados
+      const id = `${Date.now()}`; // Gera um ID único para a transação
+      await addCashTransaction(id, type, amount, date); // Adiciona a transação no banco de dados
       await carregarTransacoes(); // Atualiza as transações
     } catch (error) {
       console.error('Erro ao registrar transação:', error);
@@ -45,7 +47,7 @@ export const CashProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <CashContext.Provider value={{ transacoes, carregarTransacoes, registrarTransacao, }}>
+    <CashContext.Provider value={{ transacoes, carregarTransacoes, registrarTransacao }}>
       {children}
     </CashContext.Provider>
   );

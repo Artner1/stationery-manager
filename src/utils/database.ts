@@ -28,55 +28,23 @@ export const initializeDatabase = () => {
        );`
     );
 
-    // Verificar se a coluna "saldo" já existe na tabela "caixa"
+    // Verificar se a tabela "caixa" existe
     tx.executeSql(
-      `PRAGMA table_info(caixa);`,
-      [],
-      (_, { rows }) => {
-        const hasSaldoColumn = rows._array.some((row: any) => row.name === 'saldo');
-
-        if (!hasSaldoColumn) {
-          console.log('Atualizando tabela "caixa" para adicionar a coluna "saldo"...');
-
-          // Criar uma tabela temporária com a nova estrutura
-          tx.executeSql(
-            `CREATE TABLE IF NOT EXISTS caixa_temp (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               type TEXT NOT NULL,
-               amount REAL NOT NULL,
-               date TEXT NOT NULL,
-               saldo REAL NOT NULL
-             );`
-          );
-
-          // Copiar os dados da tabela antiga para a nova tabela
-          tx.executeSql(
-            `INSERT INTO caixa_temp (id, type, amount, date, saldo)
-             SELECT id, type, amount, date, 0 FROM caixa;`
-          );
-
-          // Remover a tabela antiga
-          tx.executeSql(`DROP TABLE IF EXISTS caixa;`);
-
-          // Renomear a tabela temporária para "caixa"
-          tx.executeSql(`ALTER TABLE caixa_temp RENAME TO caixa;`);
-
-          console.log('Tabela "caixa" atualizada com sucesso.');
-        }
-      },
-      (_, error) => {
-        console.error('Erro ao verificar a tabela "caixa":', error);
-        return false;
-      }
+      `CREATE TABLE IF NOT EXISTS caixa (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         type TEXT NOT NULL,
+         amount REAL NOT NULL,
+         date TEXT NOT NULL,
+         saldo REAL NOT NULL
+       );`
     );
 
-    // Verifica e inicializa o saldo caso não exista nenhuma entrada no caixa
+    // Inicializa o saldo caso a tabela esteja vazia
     tx.executeSql(
       `SELECT saldo FROM caixa LIMIT 1;`,
       [],
       (_, { rows }) => {
         if (rows.length === 0) {
-          // Insere uma entrada inicial com saldo 0
           tx.executeSql(
             `INSERT INTO caixa (type, amount, date, saldo) VALUES (?, ?, ?, ?);`,
             ['Inicial', 0, new Date().toISOString(), 0],
@@ -145,7 +113,7 @@ export const fetchAllVendas = (): Promise<Venda[]> => {
         (_, error) => {
           console.error('Erro ao buscar vendas:', error);
           reject(error);
-          return true; // Retorna true para indicar que o erro foi tratado
+          return false;
         }
       );
     });
@@ -154,8 +122,13 @@ export const fetchAllVendas = (): Promise<Venda[]> => {
 
 // Função para registrar entradas e saídas no caixa
 export const addCashTransaction = (
-id: string, type: string, amount: number, date: string, type: 'Entrada' | 'Saída', amount: number, date: string) => {
+  id: string,
+  type: 'Entrada' | 'Saída',
+  amount: number,
+  date: string
+) => {
   db.transaction((tx) => {
+    // Busca o saldo atual
     tx.executeSql(
       `SELECT saldo FROM caixa ORDER BY id DESC LIMIT 1;`,
       [],
@@ -163,20 +136,20 @@ id: string, type: string, amount: number, date: string, type: 'Entrada' | 'Saíd
         const saldoAtual = rows.length > 0 ? rows.item(0).saldo : 0;
         const novoSaldo = type === 'Entrada' ? saldoAtual + amount : saldoAtual - amount;
 
-        // Insere a transação no caixa
+        // Insere a transação no caixa com o novo saldo
         tx.executeSql(
           `INSERT INTO caixa (type, amount, date, saldo) VALUES (?, ?, ?, ?);`,
           [type, amount, date, novoSaldo],
-          (_, result) => console.log('Transação registrada:', result),
+          () => console.log('Transação registrada com sucesso!'),
           (_, error) => {
             console.error('Erro ao registrar transação:', error);
-            return true; // Retorna true para indicar que o erro foi tratado
+            return false;
           }
         );
       },
       (_, error) => {
         console.error('Erro ao buscar saldo atual:', error);
-        return true;
+        return false;
       }
     );
   });
@@ -193,7 +166,7 @@ export const fetchCashTransactions = (): Promise<any[]> => {
         (_, error) => {
           console.error('Erro ao buscar transações do caixa:', error);
           reject(error);
-          return true;
+          return false;
         }
       );
     });

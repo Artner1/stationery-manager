@@ -1,34 +1,43 @@
 import React from 'react';
-import { View, Text, FlatList, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'; // Alterei para BottomTabNavigationProp
+import { RootTabParamList } from '../types/navigation'; // Certifique-se de que o caminho está correto
 
-// Placeholder para os dados do histórico de caixa
-const cashData = [
-  { id: '1', type: 'Entrada', amount: 100.0, date: '2024-11-10' },
-  { id: '2', type: 'Saída', amount: 30.0, date: '2024-11-10' },
-  { id: '3', type: 'Entrada', amount: 200.0, date: '2024-11-11' },
-];
+const Home: React.FC = () => {
+  // Tipagem do hook de navegação para Bottom Tab Navigator
+  const navigation = useNavigation<BottomTabNavigationProp<RootTabParamList>>();
 
-// Saldo inicial fictício
-const initialBalance = 270.0;
-
-const Home = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Saldo do Caixa</Text>
-      <Text style={styles.balance}>R$ {initialBalance.toFixed(2)}</Text>
-      <FlatList
-        data={cashData}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.itemContainer}>
-            <Text style={styles.itemText}>{item.type}</Text>
-            <Text style={styles.itemText}>R$ {item.amount.toFixed(2)}</Text>
-            <Text style={styles.itemText}>Data: {item.date}</Text>
-          </View>
-        )}
-      />
-      <Button title="Adicionar Entrada" onPress={() => {}} />
-      <Button title="Adicionar Saída" onPress={() => {}} />
+      <Text style={styles.title}>Olá, Rafaela! 🌟</Text>
+      <Text style={styles.subtitle}>Aqui está um resumo do seu negócio:</Text>
+
+      {/* Outros elementos da tela aqui... */}
+
+      {/* Botões de Ação Rápida */}
+      <View style={styles.actionsContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Sales')} // Navega para a aba de vendas
+        >
+          <Text style={styles.buttonText}>Registrar Venda</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Inventory')} // Navega para a aba de inventário (exemplo)
+        >
+          <Text style={styles.buttonText}>Adicionar Produto</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('CashPage')} // Navega para a aba de caixa
+        >
+          <Text style={styles.buttonText}>Ver Caixa</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -42,25 +51,33 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
+    marginBottom: 10,
   },
-  balance: {
-    fontSize: 22,
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#666',
+  },
+  actionsContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  button: {
+    backgroundColor: '#3498db',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '30%',
+  },
+  buttonText: {
+    fontSize: 16,
+    color: '#ffffff',
     fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 10,
-  },
-  itemContainer: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  itemText: {
-    fontSize: 18,
   },
 });
-
-console.log('Dados de caixa na Home:', cashData);
 
 export default Home;

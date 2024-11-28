@@ -3,17 +3,18 @@ import { View, FlatList, Button, Alert, Text, StyleSheet } from 'react-native';
 import { useSales } from '../context/SalesContext';
 import { useInventory } from '../context/InventoryContext';
 
-
 const Sales = () => {
   const { produtos } = useInventory(); // Dados dos produtos
   const { vendas, registrarVenda } = useSales(); // Dados e funções do contexto de vendas
 
   const handleAddVenda = async (produto_id: string, preco: number) => {
+    const quantidade = 1; // Quantidade fixa (pode ser alterado para permitir input)
     const novaVenda = {
       id: String(Date.now()),
       produto_id,
-      quantidade: 1, // Exemplo: quantidade fixa (pode ser alterado para permitir input)
+      quantidade,
       preco,
+      total: quantidade * preco, // Calcula o total da venda
       data: new Date().toISOString().split('T')[0],
     };
 
@@ -52,7 +53,10 @@ const Sales = () => {
           <View style={styles.itemContainer}>
             <Text style={styles.itemText}>Produto ID: {item.produto_id}</Text>
             <Text style={styles.itemText}>Quantidade: {item.quantidade}</Text>
-            <Text style={styles.itemText}>Preço: R$ {item.preco.toFixed(2)}</Text>
+            <Text style={styles.itemText}>Preço: R$ {item.preco?.toFixed(2) || '0.00'}</Text>
+            <Text style={styles.itemText}>
+              Total: R$ {item.total?.toFixed(2) || (item.quantidade * item.preco)?.toFixed(2) || '0.00'}
+            </Text>
             <Text style={styles.itemText}>Data: {item.data}</Text>
           </View>
         )}
