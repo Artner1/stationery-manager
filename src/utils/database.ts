@@ -1,12 +1,12 @@
 import * as SQLite from 'expo-sqlite';
 import { Produto, Venda } from '../types/types';
 
-// Abre ou cria o banco de dados
+
 const db = SQLite.openDatabase('papelaria.db');
 
 export const initializeDatabase = () => {
   db.transaction((tx) => {
-    // Criação da tabela de produtos
+    
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS produtos (
          id TEXT PRIMARY KEY,
@@ -16,7 +16,7 @@ export const initializeDatabase = () => {
        );`
     );
 
-    // Criação da tabela de vendas
+    
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS vendas (
          id TEXT PRIMARY KEY,
@@ -28,7 +28,7 @@ export const initializeDatabase = () => {
        );`
     );
 
-    // Verificar se a tabela "caixa" existe
+    
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS caixa (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +39,7 @@ export const initializeDatabase = () => {
        );`
     );
 
-    // Inicializa o saldo caso a tabela esteja vazia
+    
     tx.executeSql(
       `SELECT saldo FROM caixa LIMIT 1;`,
       [],
@@ -64,7 +64,7 @@ export const initializeDatabase = () => {
   });
 };
 
-// Função para adicionar produto
+
 export const addProduto = (produto: Produto) => {
   db.transaction((tx) => {
     tx.executeSql(
@@ -74,17 +74,30 @@ export const addProduto = (produto: Produto) => {
   });
 };
 
-// Função para registrar venda
 export const addVenda = (venda: Venda) => {
   db.transaction((tx) => {
+    if (!venda.data) {
+      venda.data = new Date().toISOString().split('T')[0]; 
+    }
+
+    if (!venda.preco || venda.preco <= 0) {
+      console.error('Erro: Preço inválido ao registrar venda.');
+      return; 
+    }
+
     tx.executeSql(
       'INSERT INTO vendas (id, produto_id, quantidade, preco, data) VALUES (?, ?, ?, ?, ?);',
-      [venda.id, venda.produto_id, venda.quantidade, venda.preco, venda.data || null]
+      [venda.id, venda.produto_id, venda.quantidade, venda.preco, venda.data],
+      () => console.log('Venda registrada com sucesso!'),
+      (_, error) => {
+        console.error('Erro ao registrar venda no banco de dados:', error);
+        return false;
+      }
     );
   });
 };
 
-// Função para buscar todos os produtos
+
 export const fetchAllProdutos = (): Promise<Produto[]> => {
   return new Promise((resolve, reject) => {
     db.transaction((tx) => {
@@ -102,14 +115,20 @@ export const fetchAllProdutos = (): Promise<Produto[]> => {
   });
 };
 
-// Função para buscar todas as vendas
+
 export const fetchAllVendas = (): Promise<Venda[]> => {
   return new Promise((resolve, reject) => {
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM vendas;',
         [],
-        (_, { rows: { _array } }) => resolve(_array as Venda[]),
+        (_, { rows: { _array } }) => {
+          const vendas = _array.map((venda) => ({
+            ...venda,
+            total: venda.preco * venda.quantidade, // Garante que o total seja calculado
+          }));
+          resolve(vendas);
+        },
         (_, error) => {
           console.error('Erro ao buscar vendas:', error);
           reject(error);
@@ -120,7 +139,6 @@ export const fetchAllVendas = (): Promise<Venda[]> => {
   });
 };
 
-// Função para registrar entradas e saídas no caixa
 export const addCashTransaction = (
   id: string,
   type: 'Entrada' | 'Saída',
@@ -128,7 +146,7 @@ export const addCashTransaction = (
   date: string
 ) => {
   db.transaction((tx) => {
-    // Busca o saldo atual
+    
     tx.executeSql(
       `SELECT saldo FROM caixa ORDER BY id DESC LIMIT 1;`,
       [],
@@ -136,7 +154,7 @@ export const addCashTransaction = (
         const saldoAtual = rows.length > 0 ? rows.item(0).saldo : 0;
         const novoSaldo = type === 'Entrada' ? saldoAtual + amount : saldoAtual - amount;
 
-        // Insere a transação no caixa com o novo saldo
+        
         tx.executeSql(
           `INSERT INTO caixa (type, amount, date, saldo) VALUES (?, ?, ?, ?);`,
           [type, amount, date, novoSaldo],
@@ -155,7 +173,7 @@ export const addCashTransaction = (
   });
 };
 
-// Função para buscar o histórico do caixa
+
 export const fetchCashTransactions = (): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     db.transaction((tx) => {

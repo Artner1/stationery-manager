@@ -10,6 +10,8 @@ export type Venda = {
   produto_id: string;
   quantidade: number;
   preco: number;
-  total: number; 
   data: string;
+  total?: number; 
 };
+
+

@@ -13,28 +13,40 @@ const SalesContext = createContext<SalesContextData | undefined>(undefined);
 export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [vendas, setVendas] = useState<Venda[]>([]);
 
-  // Função para carregar todas as vendas do banco de dados
+  
   const carregarVendas = async () => {
     try {
       const vendasObtidas = await fetchAllVendas();
-      setVendas(vendasObtidas);
+  
+      // Garante que todas as vendas tenham o campo total calculado
+      const vendasComTotal = vendasObtidas.map((venda) => ({
+        ...venda,
+        total: venda.total ?? venda.preco * venda.quantidade, // Calcula se estiver ausente
+      }));
+  
+      setVendas(vendasComTotal);
     } catch (error) {
       console.error('Erro ao carregar vendas:', error);
     }
   };
+  
 
-  // Função para registrar uma nova venda
   const registrarVenda = async (novaVenda: Venda) => {
     try {
-      await addVenda(novaVenda); // Adiciona ao banco de dados
+      // Calcula o total da venda antes de registrar
+      const total = novaVenda.preco * novaVenda.quantidade;
+      const vendaComTotal = { ...novaVenda, total };
+  
+      await addVenda(vendaComTotal); // Adiciona ao banco de dados
       await carregarVendas(); // Atualiza a lista de vendas
     } catch (error) {
       console.error('Erro ao registrar venda:', error);
     }
   };
+  
 
   useEffect(() => {
-    carregarVendas(); // Carrega as vendas ao montar o contexto
+    carregarVendas(); 
   }, []);
 
   return (
@@ -44,7 +56,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
-// Hook personalizado para usar o contexto
+
 export const useSales = () => {
   const context = useContext(SalesContext);
   if (!context) {

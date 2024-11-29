@@ -4,17 +4,17 @@ import { useSales } from '../context/SalesContext';
 import { useInventory } from '../context/InventoryContext';
 
 const Sales = () => {
-  const { produtos } = useInventory(); // Dados dos produtos
-  const { vendas, registrarVenda } = useSales(); // Dados e funções do contexto de vendas
+  const { produtos } = useInventory(); 
+  const { vendas, registrarVenda } = useSales(); 
 
   const handleAddVenda = async (produto_id: string, preco: number) => {
-    const quantidade = 1; // Quantidade fixa (pode ser alterado para permitir input)
+    const quantidade = 1; 
     const novaVenda = {
       id: String(Date.now()),
       produto_id,
       quantidade,
       preco,
-      total: quantidade * preco, // Calcula o total da venda
+      total: quantidade * preco, 
       data: new Date().toISOString().split('T')[0],
     };
 

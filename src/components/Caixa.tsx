@@ -6,12 +6,12 @@ const CashPage = () => {
   const [balance, setBalance] = useState<number>(0); // Saldo atual do caixa
   const [amount, setAmount] = useState<string>(''); // Valor a ser adicionado ou retirado
 
-  // Função para carregar o saldo inicial
+  
   const loadBalance = async () => {
     try {
       const transactions = await fetchCashTransactions();
 
-      // Calcula o saldo com base nas transações
+      
       const totalBalance = transactions.reduce((acc, transaction) => {
         return transaction.type === 'Entrada'
           ? acc + transaction.amount
@@ -25,7 +25,7 @@ const CashPage = () => {
     }
   };
 
-  // Função para adicionar entrada ou saída
+  
   const handleTransaction = async (type: 'Entrada' | 'Saída') => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       Alert.alert('Erro', 'Por favor, insira um valor válido.');
@@ -37,8 +37,8 @@ const CashPage = () => {
     try {
       const date = new Date().toISOString().split('T')[0]; // Data atual
       await addCashTransaction(String(Date.now()), type, value, date); // Registra a transação
-      setAmount(''); // Limpa o campo de entrada
-      loadBalance(); // Atualiza o saldo
+      setAmount(''); 
+      loadBalance(); 
     } catch (error) {
       console.error('Erro ao registrar transação:', error);
       Alert.alert('Erro', 'Não foi possível registrar a transação.');
@@ -46,7 +46,7 @@ const CashPage = () => {
   };
 
   useEffect(() => {
-    loadBalance(); // Carrega o saldo ao montar o componente
+    loadBalance(); 
   }, []);
 
   return (

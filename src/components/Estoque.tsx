@@ -8,10 +8,10 @@ const Inventory = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [novoPreco, setNovoPreco] = useState('');
   const [novaQuantidade, setNovaQuantidade] = useState('');
-  const [nomeProduto, setNomeProduto] = useState(''); // Nome para adicionar produto
-  const [adicionarModalVisible, setAdicionarModalVisible] = useState(false); // Modal de adicionar produto
+  const [nomeProduto, setNomeProduto] = useState(''); 
+  const [adicionarModalVisible, setAdicionarModalVisible] = useState(false); 
 
-  // Abre o modal de edição com os dados do produto selecionado
+  
   const handleEdit = (produto: any) => {
     setProdutoSelecionado(produto);
     setNovoPreco(String(produto.preco));
@@ -19,7 +19,7 @@ const Inventory = () => {
     setModalVisible(true);
   };
 
-  // Confirma a edição e atualiza o produto
+  
   const confirmarEdicao = () => {
     if (!novoPreco || !novaQuantidade) {
       Alert.alert('Erro', 'Preencha todos os campos.');
@@ -39,7 +39,7 @@ const Inventory = () => {
     setModalVisible(false);
   };
 
-  // Exclui o produto do inventário
+  
   const handleDelete = (produtoId: string) => {
     Alert.alert(
       'Confirmar Exclusão',
@@ -58,7 +58,7 @@ const Inventory = () => {
     );
   };
 
-  // Confirma a adição de um novo produto
+  
   const confirmarAdicao = () => {
     if (!nomeProduto || !novoPreco || !novaQuantidade) {
       Alert.alert('Erro', 'Preencha todos os campos.');

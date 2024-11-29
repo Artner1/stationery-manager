@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { Produto, Venda } from '../types/types';
 import db, { fetchAllProdutos, addProduto, addVenda } from '../utils/database';
 
-// Interface do contexto
+
 export interface InventoryContextData {
   produtos: Produto[];
   carregarProdutos: () => void;
@@ -11,14 +11,14 @@ export interface InventoryContextData {
   removerProduto: (produtoId: string) => void;
 }
 
-// Criação do contexto
+
 const InventoryContext = createContext<InventoryContextData>({} as InventoryContextData);
 
-// Provider do contexto
+
 export const InventoryProvider = ({ children }: { children: ReactNode }) => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
 
-  // Função para carregar os produtos do banco de dados
+  
   const carregarProdutos = () => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -36,14 +36,14 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  // Função para adicionar um produto ao banco de dados
+  
   const adicionarProduto = (produto: Produto) => {
     db.transaction(
       (tx) => {
         tx.executeSql(
           'INSERT INTO produtos (id, nome, preco, quantidade) VALUES (?, ?, ?, ?);',
           [produto.id, produto.nome, produto.preco, produto.quantidade],
-          () => carregarProdutos(), // Atualiza a lista após inserir
+          () => carregarProdutos(), 
           (_, error) => {
             console.error('Erro ao adicionar produto:', error);
             return false;
@@ -96,7 +96,7 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
-  // Criação da tabela no banco de dados, se não existir
+  
   useEffect(() => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -107,7 +107,7 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
           quantidade INTEGER NOT NULL
         );`,
         [],
-        () => carregarProdutos(), // Carrega os produtos após criar a tabela
+        () => carregarProdutos(), 
         (_, error) => {
           console.error('Erro ao criar tabela:', error);
           return false;
@@ -131,7 +131,7 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Hook para usar o contexto
+
 export const useInventory = (): InventoryContextData => {
   const context = useContext(InventoryContext);
   if (!context) {
